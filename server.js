@@ -20,6 +20,8 @@ con.connect((err) => {
 });
 
 const app = express();
+app.use(bodyParser.json());
+app.use(cors());
 
 app.get('/students', (req, res) => {
   con.query(`SELECT * FROM students`, (err, result) => {
@@ -30,9 +32,6 @@ app.get('/students', (req, res) => {
     }
   });
 });
-
-app.use(bodyParser.json());
-app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('This boilerplate is working!');

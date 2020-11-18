@@ -51,34 +51,60 @@ function timeValidate(date) {
     dateVal.getDay() < 5
   );
 }
-app.post('/add-attendency', (req, res) => {
-  const studentId = req.body.studentId;
+
+function registerValidator(id, res, callback) {
+  con.query(
+    `SELECT * FROM attendency WHERE DATE(timestamp) = CURDATE()`,
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        callback(
+          id,
+          res,
+          result.some((v) => v.studentId == id)
+        );
+      }
+    }
+  );
+}
+
+function postAttend(studentId, res, validator) {
+  console.log(validator);
   const date = new Date().toLocaleString('lt-LT', {
     timeZone: 'Europe/Vilnius',
   });
-  console.log(date);
-  if (studentId && timeValidate(date)) {
-    con.query(
-      `INSERT INTO attendency (studentId) VALUES ('${studentId}')`,
-      (err, result) => {
-        if (err) {
-          res
-            .status(400)
-            .send(
-              'The DB has not added any records due to an internal problem'
-            );
-        } else {
-          res.status(201).send('Successfully added');
-        }
-      }
-    );
+  if (validator) {
+    res.status(400).json({ message: 'Already Registered!' });
   } else {
-    res
-      .status(400)
-      .send(
-        'The information provided is not correct or you are trying to add attendency when it is disabled.'
+    if (studentId && timeValidate(date)) {
+      con.query(
+        `INSERT INTO attendency (studentId) VALUES ('${studentId}')`,
+        (err, result) => {
+          if (err) {
+            res
+              .status(400)
+              .send(
+                'The DB has not added any records due to an internal problem'
+              );
+          } else {
+            res.status(201).send('Successfully added');
+          }
+        }
       );
+    } else {
+      res
+        .status(400)
+        .send(
+          'The information provided is not correct or you are trying to add attendency when it is disabled.'
+        );
+    }
   }
+}
+app.post('/add-attendency', (req, res) => {
+  const studentId = req.body.studentId;
+
+  registerValidator(studentId, res, postAttend);
 });
 
 app.get('/', (req, res) => {

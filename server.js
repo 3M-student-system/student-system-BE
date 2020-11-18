@@ -43,16 +43,20 @@ app.get('/view', (req, res) => {
 });
 
 function timeValidate(date) {
+  const dateVal = new Date(date);
   return (
-    date.getHours() >= 18 &&
-    date.getHours() < 22 &&
-    date.getDay() >= 1 &&
-    date.getDay() < 5
+    dateVal.getHours() >= 18 &&
+    dateVal.getHours() < 22 &&
+    dateVal.getDay() >= 1 &&
+    dateVal.getDay() < 5
   );
 }
 app.post('/add-attendency', (req, res) => {
   const studentId = req.body.studentId;
-  const date = new Date();
+  const date = new Date().toLocaleString('lt-LT', {
+    timeZone: 'Europe/Vilnius',
+  });
+  console.log(date);
   if (studentId && timeValidate(date)) {
     con.query(
       `INSERT INTO attendency (studentId) VALUES ('${studentId}')`,
@@ -64,7 +68,7 @@ app.post('/add-attendency', (req, res) => {
               'The DB has not added any records due to an internal problem'
             );
         } else {
-          res.status(201).json({ id: result.insertId });
+          res.status(201).send('Successfully added');
         }
       }
     );

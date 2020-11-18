@@ -32,6 +32,50 @@ app.get('/students', (req, res) => {
     }
   });
 });
+app.get('/view', (req, res) => {
+  con.query(`SELECT * FROM attendency`, (err, result) => {
+    if (err) {
+      res.status(400).json(err);
+    } else {
+      res.json(result);
+    }
+  });
+});
+
+function timeValidate(date) {
+  return (
+    date.getHours() >= 18 &&
+    date.getHours() < 22 &&
+    date.getDay() >= 1 &&
+    date.getDay() < 5
+  );
+}
+app.post('/add-attendency', (req, res) => {
+  const studentId = req.body.studentId;
+  const date = new Date();
+  if (studentId && timeValidate(date)) {
+    con.query(
+      `INSERT INTO attendency (studentId) VALUES ('${studentId}')`,
+      (err, result) => {
+        if (err) {
+          res
+            .status(400)
+            .send(
+              'The DB has not added any records due to an internal problem'
+            );
+        } else {
+          res.status(201).json({ id: result.insertId });
+        }
+      }
+    );
+  } else {
+    res
+      .status(400)
+      .send(
+        'The information provided is not correct or you are trying to add attendency when it is disabled.'
+      );
+  }
+});
 
 app.get('/', (req, res) => {
   res.send('This boilerplate is working!');

@@ -1,8 +1,8 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const mysql = require('mysql');
-require('dotenv').config();
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const mysql = require("mysql");
+require("dotenv").config();
 
 const port = process.env.SERVER_PORT || 3000;
 
@@ -16,14 +16,14 @@ const con = mysql.createConnection({
 
 con.connect((err) => {
   if (err) throw err;
-  console.log('Successfully connected to DB');
+  console.log("Successfully connected to DB");
 });
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/students', (req, res) => {
+app.get("/students", (req, res) => {
   con.query(`SELECT * FROM students`, (err, result) => {
     if (err) {
       res.status(400).json(err);
@@ -32,14 +32,17 @@ app.get('/students', (req, res) => {
     }
   });
 });
-app.get('/view', (req, res) => {
-  con.query(`SELECT * FROM attendency`, (err, result) => {
-    if (err) {
-      res.status(400).json(err);
-    } else {
-      res.json(result);
+app.get("/view", (req, res) => {
+  con.query(
+    `SELECT * FROM attendency ORDER BY timestamp ASC`,
+    (err, result) => {
+      if (err) {
+        res.status(400).json(err);
+      } else {
+        res.json(result);
+      }
     }
-  });
+  );
 });
 
 function timeValidate(date) {
@@ -50,7 +53,7 @@ function timeValidate(date) {
     date.getDay() < 5
   );
 }
-app.post('/add-attendency', (req, res) => {
+app.post("/add-attendency", (req, res) => {
   const studentId = req.body.studentId;
   const date = new Date();
   if (studentId && timeValidate(date)) {
@@ -61,7 +64,7 @@ app.post('/add-attendency', (req, res) => {
           res
             .status(400)
             .send(
-              'The DB has not added any records due to an internal problem'
+              "The DB has not added any records due to an internal problem"
             );
         } else {
           res.status(201).json({ id: result.insertId });
@@ -72,13 +75,13 @@ app.post('/add-attendency', (req, res) => {
     res
       .status(400)
       .send(
-        'The information provided is not correct or you are trying to add attendency when it is disabled.'
+        "The information provided is not correct or you are trying to add attendency when it is disabled."
       );
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('This boilerplate is working!');
+app.get("/", (req, res) => {
+  res.send("This boilerplate is working!");
 });
 
 app.listen(port, () => console.log(`Server is running on port ${port}`));

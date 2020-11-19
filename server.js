@@ -87,7 +87,7 @@ function passGenerator() {
   return genPass;
 }
 
-function postAttend(req, res, validator) {
+function postAttend(studentId, res, validator) {
   const date = new Date().toLocaleString('lt-LT', {
     timeZone: 'Europe/Vilnius',
   });
@@ -121,6 +121,7 @@ function postAttend(req, res, validator) {
 }
 
 app.post('/add-attendency', (req, res) => {
+  console.log(req.body);
   const studentId = req.body.studentId;
   if (req.body.password === passGenerator()) {
     registerValidator(studentId, res, postAttend);

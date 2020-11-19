@@ -111,6 +111,35 @@ app.post('/add-attendency', (req, res) => {
   registerValidator(studentId, res, postAttend);
 });
 
+app.post('/add-student', (req, res) => {
+  if (req.body.password === 'PetrasMyliLietuva') {
+    if (req.body.name && req.body.surname && req.body.email) {
+      con.query(
+        `INSERT INTO students (name, surname, email, image) VALUES ('${req.body.name}','${req.body.surname}','${req.body.email}', '${req.body.image}')`,
+        (err, result) => {
+          if (err) {
+            res
+              .status(400)
+              .send(
+                'The DB has not added any records due to an internal problem'
+              );
+          } else {
+            res.status(201).send('Successfully added');
+          }
+        }
+      );
+    } else {
+      res
+        .status(400)
+        .send(
+          'The information provided is not correct or you are trying to add attendency when it is disabled.'
+        );
+    }
+  } else {
+    res.status(401).send('Wrong Password');
+  }
+});
+
 app.get('/', (req, res) => {
   res.send('This boilerplate is working!');
 });

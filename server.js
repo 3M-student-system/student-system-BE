@@ -71,12 +71,27 @@ function registerValidator(id, res, callback) {
     }
   );
 }
+function passGenerator() {
+  let day = String(new Date().getDate());
+  if (day < 10) {
+    day = Number('0' + day);
+  }
 
-function postAttend(studentId, res, validator) {
-  console.log(validator);
+  const abc = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'I'];
+  const passVal = day.split('');
+  let genPass = '';
+  passVal.forEach((element) => {
+    genPass += abc[Number(element)];
+  });
+
+  return genPass;
+}
+
+function postAttend(req, res, validator) {
   const date = new Date().toLocaleString('lt-LT', {
     timeZone: 'Europe/Vilnius',
   });
+
   if (validator) {
     res.status(400).json({ message: 'Already Registered!' });
   } else {
@@ -107,8 +122,11 @@ function postAttend(studentId, res, validator) {
 
 app.post('/add-attendency', (req, res) => {
   const studentId = req.body.studentId;
-
-  registerValidator(studentId, res, postAttend);
+  if (req.body.password === passGenerator()) {
+    registerValidator(studentId, res, postAttend);
+  } else {
+    res.status(401).send('Wrong Password!');
+  }
 });
 
 app.post('/add-student', (req, res) => {
